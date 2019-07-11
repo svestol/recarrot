@@ -1,0 +1,37 @@
+{
+  "name": "@svestol/re-carrot",
+  "version": "0.1.0",
+  "description": "RabbitMQ library (testing)",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx mocha && npx eslint . -f codeframe"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/svestol/recarrot.git"
+  },
+  "keywords": [
+    "RabbitMQ",
+    "amqplib"
+  ],
+  "author": "svestol",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/svestol/recarrot/issues"
+  },
+  "homepage": "https://github.com/svestol/recarrot#readme",
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "expect.js": "^0.3.1",
+    "mocha": "^6.1.4"
+  },
+  "dependencies": {
+    "amqplib": "^0.5.3",
+    "debug": "^4.1.1"
+  }
+}
