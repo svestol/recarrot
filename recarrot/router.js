@@ -3,6 +3,42 @@
 const debug = require('debug')('carrot:router')
 const matcher = require('./matcher')
 
+const assignScore = (inKey, inPattern) => {
+  const key = inKey.split('.')
+  const pattern = inPattern.split('.')
+
+  let score = 0
+
+  key.forEach((keyPart, idx) => {
+    if (keyPart === pattern[idx]) {
+      score += 3
+    }
+    else if (pattern[idx] === '*') {
+      score += 2
+    }
+    else if (pattern[idx] === '#') {
+      score += 1
+    }
+  })
+
+  return score
+}
+
+const findBestMatch = (key, matches) => {
+  let highestScore = 0
+  let rv = null
+
+  matches.forEach(match => {
+    const score = assignScore(key, match.pattern)
+    if (score > highestScore) {
+      highestScore = score
+      rv = match
+    }
+  })
+
+  return rv
+}
+
 module.exports = callback => {
   const match = matcher()
 
@@ -15,7 +51,12 @@ module.exports = callback => {
     })
 
     debug('matched', matches.length, 'routes')
-    return Promise.all(matches.map(route => Promise.resolve(route.callback(event)).catch(err => err)))
+    debug('finding longest most specific match')
+
+    const bestMatch = findBestMatch(event.fields.routingKey, matches)
+
+    debug('found', bestMatch.pattern)
+    return Promise.resolve(bestMatch.callback(event))
   }
 
   const on = (pattern, callback) => {
