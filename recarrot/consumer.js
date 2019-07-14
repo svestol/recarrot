@@ -1,6 +1,7 @@
 'use strict'
 
 const debug = require('debug')('carrot:consumer')
+const message = require('./message')
 
 module.exports = queue => {
   if (queue.type !== 'queue') {
@@ -13,7 +14,7 @@ module.exports = queue => {
   const func = callback => {
     return queue.channel._amqp
       .then(channel => channel.consume(queue.name, event => {
-        event = { ...event, content: JSON.parse(event.content.toString()) }
+        event = message({ ...event, content: JSON.parse(event.content.toString()) })
         return Promise.resolve(callback(event))
           .then(() => channel.ack(event))
           .catch(e => {

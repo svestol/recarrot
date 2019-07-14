@@ -13,4 +13,6 @@ module.exports = {
 
   publisher: require('./recarrot/publisher'),
   consumer: require('./recarrot/consumer'),
+
+  message: require('./recarrot/message'),
 }
