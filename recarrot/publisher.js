@@ -11,10 +11,10 @@ module.exports = queue => {
     return (routingKey, event) => {
       return queue.channel._amqp.then(chan => {
         if (!queue.channel.confirm) {
-          return chan.publish(queue.name, routingKey, event.content, event.options)
+          return chan.publish(queue.name, routingKey, Buffer.from(JSON.stringify(event.content)), event.options)
         }
         return new Promise((resolve, reject) => {
-          return chan.publish(queue.name, routingKey, event.content, event.options, err => {
+          return chan.publish(queue.name, routingKey, Buffer.from(JSON.stringify(event.content)), event.options, err => {
             return err ? reject(err) : resolve()
           })
         })
@@ -25,10 +25,10 @@ module.exports = queue => {
     return event => {
       return queue.channel._amqp.then(chan => {
         if (!queue.channel.confirm) {
-          return chan.publish('', queue.name, event.content, event.options)
+          return chan.publish('', queue.name, Buffer.from(JSON.stringify(event.content)), event.options)
         }
         return new Promise((resolve, reject) => {
-          return chan.publish('', queue.name, event.content, event.options, err => {
+          return chan.publish('', queue.name, Buffer.from(JSON.stringify(event.content)), event.options, err => {
             return err ? reject(err) : resolve()
           })
         })

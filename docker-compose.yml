@@ -1,0 +1,21 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:latest
+    networks:
+      - recarrot
+
+  application:
+    image: node:12-alpine
+    networks:
+      - recarrot
+    environment:
+      - RABBITMQ_URI=amqp://rabbitmq
+    volumes:
+      - ./:/home/node
+    working_dir: /home/node
+    user: node
+    depends_on:
+      - rabbitmq
+networks:
+  recarrot:
