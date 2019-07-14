@@ -8,6 +8,8 @@ module.exports = (inOptions) => {
     interval: 50,
   }
 
+  let stopped = false
+
   const options = Object.assign({}, defaults, inOptions)
   let pending = []
 
@@ -16,6 +18,7 @@ module.exports = (inOptions) => {
     pending = pending.filter(e => !expired.includes(e))
 
     expired.forEach(e => {
+      debug('pending event with correlation id', e.id, 'timed out')
       e.reject(new Error('Response timed out'))
     })
   }, options.interval)
@@ -28,10 +31,15 @@ module.exports = (inOptions) => {
     }
 
     pending = pending.filter(e => e !== found)
+    debug('found match for correlation id', event.properties.correlationId)
     return Promise.resolve(found.resolve(event))
   }
 
   const wait = event => {
+    if (stopped) {
+      throw new Error('The queue is stopped')
+    }
+
     return new Promise((resolve, reject) => {
       pending = [ ...pending, {
         id: event.properties.correlationId, resolve, reject, expire: Date.now() + options.timeout,
@@ -40,9 +48,28 @@ module.exports = (inOptions) => {
   }
 
   const stop = () => {
-    // fix so the queue drains before resolving
-    clearInterval(interval)
-    interval = null
+    if (stopped) {
+      throw new Error('The queue is already stopped')
+    }
+
+    return new Promise((resolve, reject) => {
+      const check = () => {
+        debug('checking if the queue is empty')
+        if (pending.length === 0) {
+          debug('the queue is empty. clearing the interval')
+          clearInterval(interval)
+          interval = null
+          resolve(true)
+          return true
+        }
+
+        debug('the queue is not empty yet. setting timeout')
+        setTimeout(check, 50)
+      }
+
+      debug('trying to stop the queue')
+      check()
+    })
   }
 
   return Object.defineProperties(func, {
